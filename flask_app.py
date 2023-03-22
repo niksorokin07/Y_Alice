@@ -25,11 +25,12 @@ logging.basicConfig(level=logging.INFO)
 # Когда он откажется купить слона,
 # то мы уберем одну подсказку. Как будто что-то меняется :)
 sessionStorage = {}
+product = 'Слон'
 
 
 @app.route('/')
 def index():
-    return "Hello! This is the starter page."
+    return "Hello! :D This is the starter page."
 
 
 @app.route('/post', methods=['POST'])
@@ -62,7 +63,7 @@ def main():
 
 def handle_dialog(req, res):
     user_id = req['session']['user_id']
-
+    global product
     if req['session']['new']:
         # Это новый пользователь.
         # Инициализируем сессию и поприветствуем его.
@@ -76,7 +77,7 @@ def handle_dialog(req, res):
             ]
         }
         # Заполняем текст ответа
-        res['response']['text'] = 'Привет! Купи слона!'
+        res['response']['text'] = f'Привет! Купи {product}а!'
         # Получим подсказки
         res['response']['buttons'] = get_suggests(user_id)
         return
@@ -93,16 +94,18 @@ def handle_dialog(req, res):
         'ладно',
         'куплю',
         'покупаю',
-        'хорошо'
+        'хорошо',
+        'Я покупаю',
+        'Я куплю',
     ]:
         # Пользователь согласился, прощаемся.
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
+        res['response']['text'] = f'{product}а можно найти на Яндекс.Маркете!'
         res['response']['end_session'] = True
+        product = 'Кролик'
         return
-
     # Если нет, то убеждаем его купить слона!
     res['response']['text'] = \
-        f"Все говорят '{req['request']['original_utterance']}', а ты купи слона!"
+        f"Все говорят '{req['request']['original_utterance']}', а ты купи {product}а!"
     res['response']['buttons'] = get_suggests(user_id)
 
 
@@ -125,7 +128,7 @@ def get_suggests(user_id):
     if len(suggests) < 2:
         suggests.append({
             "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=слон",
+            "url": f"https://market.yandex.ru/search?text={product}",
             "hide": True
         })
 
@@ -133,4 +136,4 @@ def get_suggests(user_id):
 
 
 if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
+    app.run()
